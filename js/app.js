@@ -21,7 +21,7 @@ var TODO = function(){
 
 	List.prototype = {
 		render : function(){
-
+			listHolder.insertAdjacentHTML("beforeend", TODO.Templates.list);
 		},
 
 		remove : function(){
@@ -52,6 +52,7 @@ var TODO = function(){
 	var init = function(config){
 		holder = config.holder || document.body;
 		holder.insertAdjacentHTML("beforeend", TODO.Templates.mainwrapper);
+		listHolder = document.querySelector("#list-holder");
 
 		renderLists();
 
@@ -73,15 +74,21 @@ TODO.Templates = {
 				  		"</div>"+
 				  		"<div id='list-holder'></div>"+
 				  	"</div>",
-	"list"	: 
+	"list"	: "<div class='list'>" +
+			  		"<input type='checkbox' />" +
+			  		"<input>" +
+			  	"</div>"
 }
 
 
 // the persistance lib
 var Store = function(){
+	var get = function(){
+		return [{value : "entry 1", state : 2}, {value : "entry 2", state : 2}];
+	}
 
 	return {
-		/*get : get,
+		get : get/*,
 		put : put,
 		remove : remove*/
 	}
