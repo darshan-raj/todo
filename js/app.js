@@ -21,16 +21,26 @@ var TODO = function(){
 
 	List.prototype = {
 		render : function(){
-			listHolder.insertAdjacentHTML("beforeend", TODO.Templates.list);
+			var el;
+			listHolder.insertAdjacentHTML("beforeend", TODO.Templates.list.replace("{ID}", this.id));
+			el = listHolder.querySelector("[data-id='" + this.id + "']");
+			el.querySelector("[data-type='check']").checked = (this.state == STATES.CHECKED);
+			el.querySelector("[data-type='value']").textContent = this.value;
 		},
 
-		remove : function(){
-
-		},
-
-		save : function(){
-
+		getJSON : function(){
+			return {
+				"state" : this.state,
+				"value" : this.value
+			}
 		}
+	}
+
+	// persists a newly added list
+	var saveTask = function(list){
+		var serializedForm = list.getJSON();
+		theList.push(serializedForm);
+		//Store.set()
 	}
 
 	// reads the current lists and renders it
@@ -47,6 +57,22 @@ var TODO = function(){
 		}
 	}
 
+	var addNewTask = function(){
+		var task = document.querySelector("#new-task").value,
+			list;
+
+		if(task){
+			list = new List();
+			list.id = theList.length;
+			list.value = task;
+			list.state = STATES.UNCHECKED;
+			list.render();
+			saveTask(list);
+
+			document.querySelector("#new-task").value = "";
+		}
+	}
+
 	// public
 	// renders the TODO app based on the config
 	var init = function(config){
@@ -57,9 +83,7 @@ var TODO = function(){
 		renderLists();
 
 		// attach events
-		document.querySelector("new").addEventListener("click", function(){
-
-		});
+		document.querySelector("#new").addEventListener("click", addNewTask);
 	}
 
 	return {
@@ -67,16 +91,19 @@ var TODO = function(){
 	}
 }();
 
+/* --------------------------------------------------------------------------------------------------*/
+
 TODO.Templates = {
 	"mainwrapper" : "<div class='main-wrapper'>"+
-				  		"<div class='header'>"+
-				  			"<button id='new'>+</button>"+
+						"<div id='list-holder'></div>"+
+				  		"<div class='footer'>"+
+				  			"<button id='new' style='float:right'>+</button>"+
+				  			"<div class='inp-wrapper'><input id='new-task' ></div>" +
 				  		"</div>"+
-				  		"<div id='list-holder'></div>"+
 				  	"</div>",
-	"list"	: "<div class='list'>" +
-			  		"<input type='checkbox' />" +
-			  		"<input>" +
+	"list"	: "<div class='list' data-id='{ID}'>" +
+			  		"<input data-type='check' type='checkbox' />" +
+			  		"<span data-type='value'></span>" +
 			  	"</div>"
 }
 
@@ -84,7 +111,7 @@ TODO.Templates = {
 // the persistance lib
 var Store = function(){
 	var get = function(){
-		return [{value : "entry 1", state : 2}, {value : "entry 2", state : 2}];
+		return [{value : "entry 1", state : 1}, {value : "entry 2", state : 2}];
 	}
 
 	return {
